@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "course": {
+    "id": "new-course",
+    "title": "新课程名称",
+    "description": "请替换为本课程简介。",
+    "version": "1.0.0"
+  },
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "第一章"
+    }
+  ],
+  "questions": [
+    {
+      "id": "new-q1",
+      "chapterId": "chapter-1",
+      "type": "A1",
+      "num": 1,
+      "stem": "【模板示例，请替换】1+1等于多少？",
+      "options": [
+        {
+          "id": "A",
+          "text": "1"
+        },
+        {
+          "id": "B",
+          "text": "2"
+        },
+        {
+          "id": "C",
+          "text": "3"
+        }
+      ],
+      "answers": [
+        "B"
+      ],
+      "explanation": "这是可被系统加载的模板题，请整体替换为真实题目。"
+    },
+    {
+      "id": "new-q2",
+      "chapterId": "chapter-1",
+      "type": "X",
+      "num": 2,
+      "stem": "【模板示例，请替换】下列哪些是偶数？",
+      "options": [
+        {
+          "id": "A",
+          "text": "2"
+        },
+        {
+          "id": "B",
+          "text": "3"
+        },
+        {
+          "id": "C",
+          "text": "4"
+        }
+      ],
+      "answers": [
+        "A",
+        "C"
+      ]
+    }
+  ]
+}

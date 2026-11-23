@@ -1,0 +1,12 @@
+{
+  "name": "quiz-study-system",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Static multi-course question practice website; npm is only needed for development tests.",
+  "scripts": {
+    "validate": "node tools/validate-banks.cjs",
+    "test": "node --test tests/engine.test.cjs tests/ui.test.mjs"
+  },
+  "devDependencies": { "happy-dom": "21.0.4" },
+  "engines": { "node": ">=20.19.0" }
+}
