@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刷题小助手 · 预防医学</title>
+<meta name="description" content="预防医学刷题小助手：867道题，支持章节筛选、随机刷题、错题复习与学习统计。">
+<meta name="theme-color" content="#3b6ef5">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+<noscript>请启用浏览器的 JavaScript 功能以使用刷题小助手。</noscript>
+<div id="app">
+  <!-- 顶部栏 -->
+  <header class="topbar">
+    <div class="brand" onclick="go('home')">
+      <span class="brand-icon">✚</span>
+      <span class="brand-name">刷题小助手</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-nav="home" onclick="go('home')">首页</button>
+      <button class="nav-btn" data-nav="search" onclick="go('search')">🔍 搜索</button>
+      <button class="nav-btn" data-nav="wrong" onclick="go('wrong')">错题本<span class="badge" id="wrongBadge">0</span></button>
+      <button class="nav-btn" data-nav="stats" onclick="go('stats')">统计</button>
+    </nav>
+  </header>
+
+  <!-- 首页：配置 -->
+  <main id="view-home" class="view active">
+    <section class="hero">
+      <h1>开始刷题</h1>
+      <p class="subtitle">选择题库范围与刷题模式，随时开始</p>
+    </section>
+
+    <div class="config-card">
+      <div class="config-group">
+        <div class="config-label">① 选择章节 <span class="hint">可多选</span></div>
+        <div class="chip-row" id="chapterChips"></div>
+        <div class="quick-row">
+          <button class="mini-btn" onclick="toggleAllChapters(true)">全选章节</button>
+          <button class="mini-btn" onclick="toggleAllChapters(false)">清空</button>
+        </div>
+      </div>
+
+      <div class="config-group">
+        <div class="config-label">② 题型 <span class="hint">可多选</span></div>
+        <div class="chip-row" id="typeChips"></div>
+      </div>
+
+      <div class="config-group">
+        <div class="config-label">③ 刷题模式</div>
+        <div class="mode-grid">
+          <button class="mode-card active" data-mode="normal" onclick="selectMode('normal')">
+            <span class="mode-emoji">📝</span>
+            <span class="mode-title">普通模式</span>
+            <span class="mode-desc">作答后显示对错与答案</span>
+          </button>
+          <button class="mode-card" data-mode="fast" onclick="selectMode('fast')">
+            <span class="mode-emoji">⚡</span>
+            <span class="mode-title">快刷模式</span>
+            <span class="mode-desc">选完即走，连续快速刷，不计即时解析</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="config-group">
+        <div class="config-label">④ 高级设置</div>
+        <div class="switch-row">
+          <label class="switch-item">
+            <span class="switch-text"><b>题目乱序</b><small>打乱题目出现的题号顺序</small></span>
+            <input type="checkbox" id="setShuffleQ" checked>
+            <span class="switch-ui"></span>
+          </label>
+          <label class="switch-item">
+            <span class="switch-text"><b>选项乱序</b><small>打乱每题 A~E 选项（答案同步）</small></span>
+            <input type="checkbox" id="setShuffleOpt" checked>
+            <span class="switch-ui"></span>
+          </label>
+          <label class="switch-item">
+            <span class="switch-text"><b>隐藏原题号</b><small>隐藏题库中的原题编号</small></span>
+            <input type="checkbox" id="setHideNum" checked>
+            <span class="switch-ui"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="start-bar">
+        <div class="start-info">共筛出 <b id="filteredCount">0</b> 题</div>
+        <button class="start-btn" onclick="startQuiz()">开始刷题 →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 搜索页 -->
+  <main id="view-search" class="view">
+    <section class="hero">
+      <h1>搜索题目</h1>
+      <p class="subtitle">输入关键词，查找题干、选项或答案</p>
+    </section>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="如：苯中毒、维生素、水俣病…" autocomplete="off" oninput="doSearch()">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">×</button>
+    </div>
+    <div class="search-filter" id="searchFilter">
+      <button class="filter-chip active" data-f="all" onclick="setSearchFilter('all')">全部章节</button>
+      <button class="filter-chip" data-f="0" onclick="setSearchFilter(0)">绪论及人和环境</button>
+      <button class="filter-chip" data-f="1" onclick="setSearchFilter(1)">生活环境与健康</button>
+      <button class="filter-chip" data-f="2" onclick="setSearchFilter(2)">食物与健康</button>
+      <button class="filter-chip" data-f="3" onclick="setSearchFilter(3)">生产环境与健康</button>
+    </div>
+    <div class="search-result-head" id="searchResultHead" style="display:none"></div>
+    <div class="search-results" id="searchResults"></div>
+  </main>
+
+  <!-- 刷题页 -->
+  <main id="view-quiz" class="view">
+    <div class="quiz-toolbar">
+      <button class="icon-btn" onclick="quitQuiz()" title="退出">← 退出</button>
+      <div class="progress-wrap">
+        <div class="progress-text"><span id="progCur">1</span> / <span id="progTotal">0</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+      </div>
+      <div class="quiz-stat-mini">
+        <span class="mini-correct">✓ <b id="miniCorrect">0</b></span>
+        <span class="mini-wrong">✗ <b id="miniWrong">0</b></span>
+      </div>
+    </div>
+    <div class="fast-banner" id="fastBanner">⚡ 快刷模式 · 选完自动下一题</div>
+
+    <div class="question-card" id="questionCard">
+      <div class="q-meta">
+        <span class="q-type" id="qType">A1型题</span>
+        <span class="q-chapter" id="qChapter">章节</span>
+        <span class="q-num" id="qNum">原题号</span>
+      </div>
+      <div class="shared-stem" id="sharedStem" style="display:none">
+        <div class="ss-label">共用题干 · 病例资料</div>
+        <div class="ss-text" id="sharedStemText"></div>
+      </div>
+      <div class="q-stem" id="qStem">题干</div>
+      <div class="q-options" id="qOptions"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="quiz-actions" id="quizActions">
+      <button class="action-btn ghost" onclick="prevQuestion()" id="prevBtn">← 上一题</button>
+      <button class="action-btn mark" onclick="toggleMark()" id="markBtn">☆ 标记</button>
+      <button class="action-btn primary" onclick="revealAnswer()" id="revealBtn">显示答案</button>
+      <button class="action-btn primary" onclick="nextQuestion()" id="nextBtn">下一题 →</button>
+    </div>
+    <div class="keyboard-hint">键盘快捷键：A~E 选项 · ← → 翻题 · 空格 显示答案/下一题</div>
+  </main>
+
+  <!-- 错题本 -->
+  <main id="view-wrong" class="view">
+    <section class="hero">
+      <h1>错题本</h1>
+      <p class="subtitle" id="wrongSubtitle">做错的题目会自动收录到这里</p>
+    </section>
+    <div class="wrong-toolbar" id="wrongToolbar">
+      <button class="mini-btn" onclick="startWrongQuiz()">▶ 重刷错题</button>
+      <button class="mini-btn danger" onclick="clearWrong()">清空错题本</button>
+    </div>
+    <div id="wrongList" class="wrong-list"></div>
+  </main>
+
+  <!-- 统计 -->
+  <main id="view-stats" class="view">
+    <section class="hero">
+      <h1>学习统计</h1>
+      <p class="subtitle">了解你的刷题进度与正确率</p>
+    </section>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="stats-detail" id="statsDetail"></div>
+    <div class="data-manage">
+      <button class="mini-btn" onclick="exportData()">导出学习数据</button>
+      <button class="mini-btn danger" onclick="resetProgress()">重置所有进度</button>
+    </div>
+  </main>
+
+  <!-- 结果弹层 -->
+  <div class="overlay" id="resultOverlay">
+    <div class="result-modal">
+      <div class="result-emoji" id="resultEmoji">🎉</div>
+      <h2 id="resultTitle">刷题完成</h2>
+      <div class="result-stats">
+        <div class="rs-item"><div class="rs-num" id="rsTotal">0</div><div class="rs-label">已答题数</div></div>
+        <div class="rs-item"><div class="rs-num ok" id="rsCorrect">0</div><div class="rs-label">正确</div></div>
+        <div class="rs-item"><div class="rs-num bad" id="rsWrong">0</div><div class="rs-label">错误</div></div>
+        <div class="rs-item"><div class="rs-num" id="rsRate">0%</div><div class="rs-label">正确率</div></div>
+      </div>
+      <div class="result-actions">
+        <button class="action-btn ghost" onclick="closeResult()">关闭</button>
+        <button class="action-btn primary" onclick="restartSame()">再刷一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./data/bank.js"></script>
+<script src="./assets/app.js"></script>
+</body>
+</html>
